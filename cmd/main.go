@@ -1,21 +1,40 @@
 package main
 
 import (
-	"log"
 	"todo"
 	"todo/pkg/handler"
+	"todo/pkg/repository"
+	"todo/pkg/service"
+
+	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 
 	"github.com/spf13/viper"
 )
 
 func main() {
+	logrus.SetFormatter(new(logrus.JSONFormatter))
 	if err := InitConfig(); err != nil {
-		log.Fatalf("error initializing configs: %s", err.Error())
+		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
-	handlers := new(handler.Handler)
+	db, err := repository.NewPostgresDB(repository.Config{
+		Host:     viper.GetString("db.host"),
+		Port:     viper.GetString("db.port"),
+		Username: viper.GetString("db.username"),
+		Password: viper.GetString("db.password"),
+		DBName:   viper.GetString("db.dbname"),
+		SSLMode:  viper.GetString("db.sslmode"),
+	})
+	if err != nil {
+		logrus.Fatalf("failed to initialize db:%s", err.Error())
+	}
+	repos := repository.NewRepository(db)
+	service := service.NewService(*repos)
+	handler := handler.NewHandler(*service)
+
 	srv := new(todo.Server)
-	if err := srv.Run(viper.GetString("8080"), handlers.InitRoutes()); err != nil {
-		log.Fatalf("erro occured while running http server: %s", err.Error())
+	if err := srv.Run(viper.GetString("8080"), handler.InitRoutes()); err != nil {
+		logrus.Fatalf("erro occured while running http server: %s", err.Error())
 	}
 
 }
