@@ -1,0 +1,5 @@
+firstly:
+we need to write the command "sudo docker pull postgres" for install postgres image.
+2.sudo docker run --name=todo-db -e POSTGRES_PASSWORD='qwerty' -p 5436:5432 -d --rm postgres - запуска через докер .
+3. migrate -path ./schema -database 'postgres://postgres:qwerty@localhost:5436/postgres?sslmode=disable' up  -- Подключение к серверу миграции.
+4. docker ps,docker exec.

@@ -22,8 +22,8 @@ type Repository struct {
 	TodoItem
 }
 
-func NewRepository(db *sqlx.DB) *Repository {
+func NewRepository(db sqlx.DB) *Repository {
 	return &Repository{
-		Authorization: NewAuthPostgres(*db),
+		Authorization: NewAuthPostgres(db),
 	}
 }

@@ -13,7 +13,6 @@ import (
 )
 
 func main() {
-	logrus.SetFormatter(new(logrus.JSONFormatter))
 	if err := InitConfig(); err != nil {
 		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
@@ -28,12 +27,12 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("failed to initialize db:%s", err.Error())
 	}
-	repos := repository.NewRepository(db)
+	repos := repository.NewRepository(*db)
 	service := service.NewService(*repos)
 	handler := handler.NewHandler(*service)
 
 	srv := new(todo.Server)
-	if err := srv.Run(viper.GetString("8080"), handler.InitRoutes()); err != nil {
+	if err := srv.Run(viper.GetString("port"), handler.InitRoutes()); err != nil {
 		logrus.Fatalf("error occured while running http server: %s", err.Error())
 	}
 
